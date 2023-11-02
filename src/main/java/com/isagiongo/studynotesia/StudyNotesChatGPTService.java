@@ -15,8 +15,7 @@ import reactor.core.publisher.Mono;
 public class StudyNotesChatGPTService {
 
     private static final String CHAT_GPT_MODEL = "gpt-3.5-turbo";
-    private static final double TEMPERATURE = 0.3;
-    private static final int MAX_TOKENS = 100;
+    private static final double TEMPERATURE = 0.2;
     private static final String ROLE = "user";
     private final WebClient webClient;
 
@@ -28,17 +27,19 @@ public class StudyNotesChatGPTService {
                 .build();
     }
 
-    public Mono<ChatGPTResponse> createStudyNotes(String content) {
-        ChatGPTRequest request = createStudyNotesRequest(content);
+    public Mono<ChatGPTResponse> createStudyNotes(StudyNotesRequest studyNotesRequest) {
+        ChatGPTRequest request = createStudyNotesRequest(studyNotesRequest);
         return webClient.post().bodyValue(request).retrieve().bodyToMono(ChatGPTResponse.class);
     }
 
-    private ChatGPTRequest createStudyNotesRequest(String content) {
-        String question = "Quais são os pontos chave que devo estudar sobre o assunto: " + content + " em no máximo 5 linhas";
+    private ChatGPTRequest createStudyNotesRequest(StudyNotesRequest studyNotesRequest) {
+        String question = "Quais são os pontos chave que devo estudar sobre o assunto: " + studyNotesRequest.content() + " em no máximo " + studyNotesRequest.lines() + "linhas";
         var messageToApi = new Message(ROLE, question);
-        return new ChatGPTRequest(CHAT_GPT_MODEL, List.of(messageToApi), TEMPERATURE, MAX_TOKENS);
+        return new ChatGPTRequest(CHAT_GPT_MODEL, List.of(messageToApi), TEMPERATURE, studyNotesRequest.maxTokens());
     }
 }
+
+record StudyNotesRequest(String content, Integer lines, Integer maxTokens){}
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 record ChatGPTRequest(String model, List<Message> messages, Double temperature, Integer maxTokens){

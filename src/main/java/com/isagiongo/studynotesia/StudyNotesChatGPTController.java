@@ -16,7 +16,7 @@ public class StudyNotesChatGPTController {
     }
 
     @PostMapping("study-notes")
-    public Mono<String> createStudyNotes(@RequestBody String topic) {
-        return service.createStudyNotes(topic).map(chatGPTResponse -> chatGPTResponse.choices().get(0).message().content());
+    public Mono<String> createStudyNotes(@RequestBody StudyNotesRequest studyNotesRequest) {
+        return service.createStudyNotes(studyNotesRequest).map(chatGPTResponse -> chatGPTResponse.choices().get(0).message().content());
     }
  }
